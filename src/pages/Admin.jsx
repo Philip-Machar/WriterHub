@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db, auth } from "../firebase";
-import { collection, getDocs, doc, updateDoc, addDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 function Admin() {
@@ -9,6 +9,7 @@ function Admin() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [editingGigId, setEditingGigId] = useState(null);
   const navigate = useNavigate();
 
   const fetchGigs = async () => {
@@ -21,40 +22,68 @@ function Admin() {
     setGigs(gigsList);
   };
 
-  const handleAddGig = async (e) => {
+  const handleAddOrUpdateGig = async (e) => {
     e.preventDefault();
     if (!title || !description || !price || !deadline) return alert("All fields required");
 
-    await addDoc(collection(db, "gigs"), {
-      title,
-      description,
-      price: parseFloat(price),
-      deadline: new Date(deadline),
-      status: "available",
-      paymentStatus: "unpaid"
-    });
+    if (editingGigId) {
+      const gigRef = doc(db, "gigs", editingGigId);
+      await updateDoc(gigRef, {
+        title,
+        description,
+        price: parseFloat(price),
+        deadline: new Date(deadline)
+      });
+    } else {
+      await addDoc(collection(db, "gigs"), {
+        title,
+        description,
+        price: parseFloat(price),
+        deadline: new Date(deadline),
+        status: "available",
+        paymentStatus: "unpaid"
+      });
+    }
 
-    setTitle("");
-    setDescription("");
-    setPrice("");
-    setDeadline("");
+    resetForm();
     fetchGigs();
   };
 
+  const editGig = (gig) => {
+    setEditingGigId(gig.id);
+    setTitle(gig.title);
+    setDescription(gig.description);
+    setPrice(gig.price);
+    setDeadline(
+      gig.deadline?.seconds
+        ? new Date(gig.deadline.seconds * 1000).toISOString().split("T")[0]
+        : ""
+    );
+  };
+
+  const deleteGig = async (gigId) => {
+    if (confirm("Are you sure you want to delete this gig?")) {
+      await deleteDoc(doc(db, "gigs", gigId));
+      fetchGigs();
+    }
+  };
+
   const approveGig = async (gigId) => {
-    const gigRef = doc(db, "gigs", gigId);
-    await updateDoc(gigRef, {
-      status: "approved"
-    });
+    await updateDoc(doc(db, "gigs", gigId), { status: "approved" });
     fetchGigs();
   };
 
   const markAsPaid = async (gigId) => {
-    const gigRef = doc(db, "gigs", gigId);
-    await updateDoc(gigRef, {
-      paymentStatus: "paid"
-    });
+    await updateDoc(doc(db, "gigs", gigId), { paymentStatus: "paid" });
     fetchGigs();
+  };
+
+  const resetForm = () => {
+    setEditingGigId(null);
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setDeadline("");
   };
 
   const handleLogout = () => {
@@ -89,10 +118,10 @@ function Admin() {
         </div>
       </div>
 
-      {/* New Gig Form */}
+      {/* Gig Form */}
       <div className="border p-4 rounded mb-6 shadow">
-        <h2 className="text-lg font-bold mb-2">Post a New Gig</h2>
-        <form onSubmit={handleAddGig} className="flex flex-col gap-2">
+        <h2 className="text-lg font-bold mb-2">{editingGigId ? "Edit Gig" : "Post a New Gig"}</h2>
+        <form onSubmit={handleAddOrUpdateGig} className="flex flex-col gap-2">
           <input
             type="text"
             placeholder="Title"
@@ -123,13 +152,24 @@ function Admin() {
             onChange={(e) => setDeadline(e.target.value)}
             required
           />
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            Add Gig
-          </button>
+          <div className="flex gap-2">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              {editingGigId ? "Update Gig" : "Add Gig"}
+            </button>
+            {editingGigId && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
-      {/* Gigs Needing Action */}
+      {/* Gigs List */}
       <h2 className="text-lg font-semibold mb-4">Manage Gigs</h2>
 
       {gigs.length === 0 && <p>No gigs posted yet.</p>}
@@ -148,11 +188,10 @@ function Admin() {
           <p>Status: {gig.status}</p>
           <p>Payment: {gig.paymentStatus || "unpaid"}</p>
 
-          {/* Show Submission if available */}
+          {/* Submission View */}
           {gig.status === "submitted" && (
             <div className="mt-2">
               <h3 className="font-semibold mb-1">Submitted Work:</h3>
-
               {gig.submission?.startsWith("http") ? (
                 <a
                   href={gig.submission}
@@ -183,6 +222,22 @@ function Admin() {
               Mark as Paid
             </button>
           )}
+
+          {/* Edit & Delete Buttons */}
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => editGig(gig)}
+              className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => deleteGig(gig.id)}
+              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>
