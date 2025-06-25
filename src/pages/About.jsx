@@ -11,7 +11,7 @@ export default function About() {
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-400/20 to-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 right-1/3 w-64 h-64 bg-gradient-to-r from-indigo-400/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
-      <div className="glass-panel max-w-4xl w-full p-10 rounded-3xl shadow-2xl relative z-10">
+      <div className="glass-panel max-w-5xl w-full p-10 rounded-3xl shadow-2xl relative z-10">
         <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-200 via-blue-300 to-purple-300 bg-clip-text text-transparent">About WriterHub</h1>
         <p className="text-slate-200 text-lg mb-6 leading-relaxed">
           <span className="font-semibold text-cyan-200">WriterHub</span> is a premium platform connecting talented writers with clients seeking high-quality written content. Our mission is to empower writers, streamline the gig process, and ensure every project is delivered with excellence and creativity. Whether you're a seasoned professional or a passionate newcomer, WriterHub is your space to grow, collaborate, and succeed.
