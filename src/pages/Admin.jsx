@@ -96,6 +96,15 @@ function Admin() {
     fetchGigs();
   };
 
+  const approveApplicant = async (gigId, applicant) => {
+    await updateDoc(doc(db, "gigs", gigId), {
+      claimedBy: applicant.uid,
+      status: "claimed",
+      applicants: []
+    });
+    fetchGigs();
+  };
+
   const resetForm = () => {
     setEditingGigId(null);
     setTitle("");
@@ -340,6 +349,26 @@ function Admin() {
                         </span>
                       </div>
                     </div>
+
+                    {/* Applicants Section */}
+                    {gig.applicants && gig.applicants.length > 0 && !gig.claimedBy && (
+                      <div className="w-full mt-3 mb-4">
+                        <div className="rounded-xl bg-cyan-900/20 px-4 py-2 flex flex-col gap-2">
+                          <span className="font-semibold text-cyan-300 mb-1">Applicants:</span>
+                          {gig.applicants.map(applicant => (
+                            <div key={applicant.uid} className="flex flex-col sm:flex-row sm:items-center gap-2 justify-between bg-cyan-900/10 rounded-lg px-3 py-2">
+                              <span className="text-cyan-100 break-all">{applicant.email}</span>
+                              <button
+                                onClick={() => approveApplicant(gig.id, applicant)}
+                                className="glass-button bg-gradient-to-r from-emerald-500/20 to-green-500/20 hover:from-emerald-500/30 hover:to-green-500/30 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 border border-emerald-400/30"
+                              >
+                                Approve
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {(gig.claimedBy && claimedEmails[gig.claimedBy]) && (
                       <div className="w-full mt-3 mb-4">

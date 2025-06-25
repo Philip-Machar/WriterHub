@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "../firebase";
-import { collection, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, getDoc, arrayUnion } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
@@ -33,20 +33,18 @@ function Home() {
     fetchEverything();
   }, []);
 
-  const handleClaim = async (gigId) => {
+  const handleApply = async (gig) => {
     const user = auth.currentUser;
     if (!user) {
-      // navigate("/login");
-      console.log("Please login to claim gigs");
+      console.log("Please login to apply for gigs");
       return;
     }
-
-    const gigRef = doc(db, "gigs", gigId);
+    // If already applied or gig is claimed, do nothing
+    if (gig.claimedBy || (gig.applicants && gig.applicants.some(a => a.uid === user.uid))) return;
+    const gigRef = doc(db, "gigs", gig.id);
     await updateDoc(gigRef, {
-      status: "claimed",
-      claimedBy: user.uid
+      applicants: arrayUnion({ uid: user.uid, email: user.email })
     });
-
     fetchGigs();
   };
 
@@ -201,21 +199,21 @@ function Home() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:min-w-[200px]">
-                  {gig.status === "available" && (
+                  {gig.status === "available" && !gig.claimedBy && (
                     <button
-                      onClick={e => { e.stopPropagation(); handleClaim(gig.id); }}
-                      className="glass-button bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25 border border-cyan-400/30 group/btn"
+                      onClick={e => { e.stopPropagation(); handleApply(gig); }}
+                      disabled={gig.applicants && gig.applicants.some(a => a.uid === auth.currentUser?.uid)}
+                      className={`glass-button bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25 border border-cyan-400/30 group/btn ${gig.applicants && gig.applicants.some(a => a.uid === auth.currentUser?.uid) ? 'opacity-60 cursor-not-allowed' : ''}`}
                     >
                       <span className="flex items-center justify-center gap-2">
                         <svg className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                         </svg>
-                        Claim Gig
+                        {gig.applicants && gig.applicants.some(a => a.uid === auth.currentUser?.uid) ? 'Applied' : 'Apply for Gig'}
                       </span>
                     </button>
                   )}
-
-                  {gig.status === "claimed" && gig.claimedBy === auth.currentUser?.uid && (
+                  {gig.claimedBy === auth.currentUser?.uid && (
                     <button
                       onClick={e => { e.stopPropagation(); navigate(`/submit/${gig.id}`); }}
                       className="glass-button bg-gradient-to-r from-emerald-500/20 to-green-500/20 hover:from-emerald-500/30 hover:to-green-500/30 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/25 border border-emerald-400/30 group/btn"
@@ -228,7 +226,6 @@ function Home() {
                       </span>
                     </button>
                   )}
-
                   {gig.status === "submitted" && gig.claimedBy === auth.currentUser?.uid && (
                     <div className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 px-6 py-4 rounded-2xl border border-amber-400/30 text-center">
                       <div className="flex items-center justify-center gap-2 text-amber-300 font-semibold">

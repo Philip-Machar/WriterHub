@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { db, auth } from "../firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 export default function GigDetails() {
   const { id } = useParams();
@@ -29,21 +29,21 @@ export default function GigDetails() {
     fetchGig();
   }, [id]);
 
-  const handleClaim = async () => {
+  const handleApply = async () => {
     if (!auth.currentUser) {
       navigate("/login");
       return;
     }
+    if (gig.claimedBy || (gig.applicants && gig.applicants.some(a => a.uid === auth.currentUser.uid))) return;
     setClaiming(true);
     try {
       const gigRef = doc(db, "gigs", id);
       await updateDoc(gigRef, {
-        status: "claimed",
-        claimedBy: auth.currentUser.uid
+        applicants: arrayUnion({ uid: auth.currentUser.uid, email: auth.currentUser.email })
       });
-      setGig(prev => ({ ...prev, status: "claimed", claimedBy: auth.currentUser.uid }));
+      setGig(prev => ({ ...prev, applicants: [...(prev.applicants || []), { uid: auth.currentUser.uid, email: auth.currentUser.email }] }));
     } catch (err) {
-      setError("Failed to claim gig");
+      setError("Failed to apply for gig");
     }
     setClaiming(false);
   };
@@ -80,12 +80,12 @@ export default function GigDetails() {
           <p className="text-slate-200 whitespace-pre-line leading-relaxed">{gig.description}</p>
         </div>
         <div className="flex flex-wrap items-center">
-          {gig.status === "available" && (
-            <button onClick={handleClaim} disabled={claiming} className="glass-button bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 border border-cyan-400/30">
-              {claiming ? "Claiming..." : "Claim Gig"}
+          {gig.status === "available" && !gig.claimedBy && (
+            <button onClick={handleApply} disabled={claiming || (gig.applicants && gig.applicants.some(a => a.uid === auth.currentUser?.uid))} className={`glass-button bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 border border-cyan-400/30 ${gig.applicants && gig.applicants.some(a => a.uid === auth.currentUser?.uid) ? 'opacity-60 cursor-not-allowed' : ''}`}>
+              {claiming ? "Applying..." : (gig.applicants && gig.applicants.some(a => a.uid === auth.currentUser?.uid) ? "Applied" : "Apply for Gig")}
             </button>
           )}
-          {gig.status === "claimed" && gig.claimedBy === auth.currentUser?.uid && (
+          {gig.claimedBy === auth.currentUser?.uid && (
             <button onClick={() => navigate(`/submit/${gig.id}`)} className="glass-button bg-gradient-to-r from-emerald-500/20 to-green-500/20 hover:from-emerald-500/30 hover:to-green-500/30 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 border border-emerald-400/30">
               Submit Work
             </button>
