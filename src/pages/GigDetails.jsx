@@ -67,7 +67,7 @@ export default function GigDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden flex items-center justify-center p-4">
-      <div className="glass-panel max-w-2xl w-full p-8 rounded-3xl shadow-2xl">
+      <div className="glass-panel max-w-4xl w-full p-8 rounded-3xl shadow-2xl">
         <h1 className="text-3xl font-bold text-white mb-4">{gig.title}</h1>
         <div className="mb-6">
           <span className="inline-block bg-cyan-900/20 text-cyan-200 px-4 py-2 rounded-xl mr-2 mb-2 font-semibold">Price: ${gig.price}</span>
