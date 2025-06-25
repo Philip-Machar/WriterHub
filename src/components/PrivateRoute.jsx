@@ -35,19 +35,6 @@ export default function PrivateRoute({ children, adminOnly }) {
       </div>
       <div className="relative z-10">
         <div className="glass-panel p-12 rounded-3xl flex flex-col items-center shadow-2xl">
-          {/* Logo or Icon */}
-          <div className="mb-8">
-            {/* Replace with your logo if desired */}
-            <svg className="w-20 h-20 text-cyan-300 drop-shadow-glow animate-spin-slow" fill="none" stroke="currentColor" viewBox="0 0 48 48">
-              <circle cx="24" cy="24" r="20" stroke="url(#spinner-gradient)" strokeWidth="6" fill="none" />
-              <defs>
-                <linearGradient id="spinner-gradient" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#7f5af0" />
-                  <stop offset="1" stopColor="#a3c9f9" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
           {/* Beautiful Spinner */}
           <div className="relative mb-6">
             <div className="w-16 h-16 rounded-full border-4 border-cyan-400 border-t-transparent animate-spin-slow shadow-lg shadow-cyan-400/30"></div>

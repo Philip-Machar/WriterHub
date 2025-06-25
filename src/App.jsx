@@ -5,6 +5,7 @@ import Admin from "./pages/Admin";
 import Submit from "./pages/Submit";
 import PrivateRoute from "./components/PrivateRoute";
 import GigDetails from "./pages/GigDetails";
+import About from "./pages/About";
 
 function App() {
   return (
@@ -36,6 +37,8 @@ function App() {
             <GigDetails />
           </PrivateRoute>
         } />
+
+        <Route path="/about" element={<About />} />
 
       </Routes>
     </BrowserRouter>
