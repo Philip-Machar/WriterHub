@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import Submit from "./pages/Submit";
 import PrivateRoute from "./components/PrivateRoute";
+import GigDetails from "./pages/GigDetails";
 
 function App() {
   return (
@@ -27,6 +28,12 @@ function App() {
         <Route path="/admin" element={
           <PrivateRoute adminOnly={true}>
             <Admin />
+          </PrivateRoute>
+        } />
+
+        <Route path="/gig/:id" element={
+          <PrivateRoute>
+            <GigDetails />
           </PrivateRoute>
         } />
 

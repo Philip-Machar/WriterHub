@@ -138,7 +138,11 @@ function Home() {
         {/* Gigs Grid */}
         <div className="grid gap-6 md:gap-8">
           {gigs.map((gig) => (
-            <div key={gig.id} className="glass-panel rounded-3xl p-6 sm:p-8 hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-500 hover:scale-[1.01] group">
+            <div
+              key={gig.id}
+              className="glass-panel rounded-3xl p-6 sm:p-8 hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-500 hover:scale-[1.01] group cursor-pointer"
+              onClick={() => navigate(`/gig/${gig.id}`)}
+            >
               <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-6">
                 <div className="flex-1 space-y-4">
                   <div>
@@ -146,7 +150,7 @@ function Home() {
                       {gig.title}
                     </h2>
                     <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                      {gig.description}
+                      {gig.description.length > 300 ? gig.description.slice(0, 300) + "..." : gig.description}
                     </p>
                   </div>
 
@@ -189,7 +193,7 @@ function Home() {
                 <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:min-w-[200px]">
                   {gig.status === "available" && (
                     <button
-                      onClick={() => handleClaim(gig.id)}
+                      onClick={e => { e.stopPropagation(); handleClaim(gig.id); }}
                       className="glass-button bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/25 border border-cyan-400/30 group/btn"
                     >
                       <span className="flex items-center justify-center gap-2">
@@ -203,7 +207,7 @@ function Home() {
 
                   {gig.status === "claimed" && gig.claimedBy === auth.currentUser?.uid && (
                     <button
-                      onClick={() => navigate(`/submit/${gig.id}`)}
+                      onClick={e => { e.stopPropagation(); navigate(`/submit/${gig.id}`); }}
                       className="glass-button bg-gradient-to-r from-emerald-500/20 to-green-500/20 hover:from-emerald-500/30 hover:to-green-500/30 text-white px-6 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/25 border border-emerald-400/30 group/btn"
                     >
                       <span className="flex items-center justify-center gap-2">
