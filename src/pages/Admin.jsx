@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db, auth } from "../firebase";
-import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, addDoc, deleteDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 function Admin() {
@@ -11,6 +11,7 @@ function Admin() {
   const [deadline, setDeadline] = useState("");
   const [editingGigId, setEditingGigId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [claimedEmails, setClaimedEmails] = useState({});
   const navigate = useNavigate();
 
   const fetchGigs = async () => {
@@ -23,6 +24,20 @@ function Admin() {
     }));
     setGigs(gigsList);
     setLoading(false);
+
+    // Fetch claimed user emails
+    const claimedByUids = gigsList
+      .filter(gig => gig.claimedBy)
+      .map(gig => gig.claimedBy);
+    const uniqueUids = [...new Set(claimedByUids)];
+    const emails = {};
+    await Promise.all(uniqueUids.map(async (uid) => {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        emails[uid] = userDoc.data().email;
+      }
+    }));
+    setClaimedEmails(emails);
   };
 
   const handleAddOrUpdateGig = async (e) => {
@@ -325,6 +340,15 @@ function Admin() {
                         </span>
                       </div>
                     </div>
+
+                    {(gig.claimedBy && claimedEmails[gig.claimedBy]) && (
+                      <div className="w-full mt-3 mb-4">
+                        <div className="rounded-xl bg-cyan-900/20 px-4 py-2 flex flex-col sm:flex-row sm:items-center gap-2">
+                          <span className="font-semibold text-cyan-300">Claimed by:</span>
+                          <span className="text-cyan-100 break-all">{claimedEmails[gig.claimedBy]}</span>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Submission Section */}
                     {gig.status === "submitted" && (
