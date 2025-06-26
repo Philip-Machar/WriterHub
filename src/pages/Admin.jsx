@@ -77,6 +77,7 @@ function Admin() {
         ? new Date(gig.deadline.seconds * 1000).toISOString().split("T")[0]
         : ""
     );
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const deleteGig = async (gigId) => {
