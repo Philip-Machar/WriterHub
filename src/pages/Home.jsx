@@ -7,6 +7,7 @@ function Home() {
   const [gigs, setGigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
+  const [posterApplicationStatus, setPosterApplicationStatus] = useState("");
   const navigate = useNavigate();
 
   const fetchGigs = async () => {
@@ -27,6 +28,7 @@ function Home() {
       const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
       if (userDoc.exists()) {
         setUserRole(userDoc.data().role);
+        setPosterApplicationStatus(userDoc.data().posterApplicationStatus || "");
       }
     };
 
@@ -46,6 +48,12 @@ function Home() {
       applicants: arrayUnion({ uid: user.uid, email: user.email })
     });
     fetchGigs();
+  };
+
+  const handleApplyToPost = async () => {
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    await updateDoc(userRef, { posterApplicationStatus: "pending" });
+    setPosterApplicationStatus("pending");
   };
 
   if (loading) {
@@ -126,6 +134,41 @@ function Home() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Poster Application Button */}
+        <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          {userRole !== "admin" && (
+            posterApplicationStatus === "approved" ? (
+              <button
+                className="glass-button bg-gradient-to-r from-emerald-500/20 to-green-500/20 text-white px-6 py-3 rounded-2xl font-semibold border border-emerald-400/30 cursor-pointer"
+                onClick={() => navigate("/poster")}
+              >
+                Post a Gig
+              </button>
+            ) : posterApplicationStatus === "pending" ? (
+              <button
+                className="glass-button bg-gradient-to-r from-yellow-500/20 to-amber-500/20 text-white px-6 py-3 rounded-2xl font-semibold border border-yellow-400/30 cursor-not-allowed opacity-70"
+                disabled
+              >
+                Application Pending (wait for admin approval)
+              </button>
+            ) : posterApplicationStatus === "rejected" ? (
+              <button
+                className="glass-button bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-white px-6 py-3 rounded-2xl font-semibold border border-cyan-400/30"
+                onClick={handleApplyToPost}
+              >
+                Re-Apply to Post Gigs
+              </button>
+            ) : (
+              <button
+                className="glass-button bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 text-white px-6 py-3 rounded-2xl font-semibold border border-cyan-400/30"
+                onClick={handleApplyToPost}
+              >
+                Apply to Post Gigs
+              </button>
+            )
+          )}
         </div>
 
         {/* No Gigs Message */}

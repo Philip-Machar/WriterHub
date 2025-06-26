@@ -6,6 +6,7 @@ import Submit from "./pages/Submit";
 import PrivateRoute from "./components/PrivateRoute";
 import GigDetails from "./pages/GigDetails";
 import About from "./pages/About";
+import PosterPanel from "./pages/PosterPanel";
 
 function App() {
   return (
@@ -39,6 +40,12 @@ function App() {
         } />
 
         <Route path="/about" element={<About />} />
+
+        <Route path="/poster" element={
+          <PrivateRoute>
+            <PosterPanel />
+          </PrivateRoute>
+        } />
 
       </Routes>
     </BrowserRouter>
