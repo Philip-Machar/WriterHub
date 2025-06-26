@@ -114,7 +114,7 @@ export default function PosterPanel() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      <div className="relative z-10 max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="relative z-10 max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
         {/* Back to Home Button */}
         <button
           onClick={() => navigate("/")}
