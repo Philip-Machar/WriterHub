@@ -122,7 +122,16 @@ function Admin() {
   };
 
   const approveGig = async (gigId) => {
-    await updateDoc(doc(db, "gigs", gigId), { status: "approved" });
+    // Find the gig to get the submission URL
+    const gig = gigs.find(g => g.id === gigId);
+    if (gig && gig.submission) {
+      await updateDoc(doc(db, "gigs", gigId), { 
+        status: "approved",
+        completedWork: gig.submission // Store the submission as completed work
+      });
+    } else {
+      await updateDoc(doc(db, "gigs", gigId), { status: "approved" });
+    }
     fetchGigs();
   };
 
@@ -413,12 +422,14 @@ function Admin() {
                             gig.status === "available" ? "bg-green-400 animate-pulse" : 
                             gig.status === "claimed" ? "bg-yellow-400" : 
                             gig.status === "submitted" ? "bg-orange-400" : 
+                            gig.status === "approved" ? "bg-emerald-400" : 
                             "bg-blue-400"
                           }`}></div>
                           <span className={`font-medium ${
                             gig.status === "available" ? "text-green-300" : 
                             gig.status === "claimed" ? "text-yellow-300" : 
                             gig.status === "submitted" ? "text-orange-300" : 
+                            gig.status === "approved" ? "text-emerald-300" : 
                             "text-blue-300"
                           }`}>
                             {gig.status}
@@ -487,6 +498,32 @@ function Admin() {
                               {gig.submission}
                             </p>
                           )}
+                        </div>
+                      )}
+
+                      {/* Completed Work Section */}
+                      {gig.status === "approved" && gig.completedWork && (
+                        <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-400/20 rounded-2xl p-4">
+                          <h4 className="font-semibold text-emerald-200 mb-2 flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            ✅ Completed Work (Available for Poster):
+                          </h4>
+                          <p className="text-emerald-100 text-sm mb-3">
+                            This work has been approved and is now available for the poster to download.
+                          </p>
+                          <a
+                            href={gig.completedWork}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/20 to-green-500/20 hover:from-emerald-500/30 hover:to-green-500/30 text-emerald-200 px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 border border-emerald-400/30"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            View Completed Work
+                          </a>
                         </div>
                       )}
                     </div>

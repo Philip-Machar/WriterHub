@@ -206,6 +206,35 @@ export default function PosterPanel() {
             </div>
           </form>
         </div>
+        
+        {/* Statistics Overview */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 mb-8">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent mb-6">
+            📊 Your Gig Statistics
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-400/20 rounded-2xl p-4 text-center">
+              <div className="text-2xl font-bold text-blue-300 mb-1">{gigs.length}</div>
+              <div className="text-blue-200 text-sm">Total Gigs</div>
+            </div>
+            <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-400/20 rounded-2xl p-4 text-center">
+              <div className="text-2xl font-bold text-emerald-300 mb-1 flex items-center justify-center gap-2">
+                {gigs.filter(g => g.status === "approved" && g.completedWork).length}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div className="text-emerald-200 text-sm">Completed Work</div>
+            </div>
+            <div className="bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border border-amber-400/20 rounded-2xl p-4 text-center">
+              <div className="text-2xl font-bold text-amber-300 mb-1">
+                {gigs.filter(g => g.status === "available" || g.status === "claimed" || g.status === "submitted").length}
+              </div>
+              <div className="text-amber-200 text-sm">In Progress</div>
+            </div>
+          </div>
+        </div>
+        
         <div className="glass-panel rounded-3xl p-6 sm:p-8">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent mb-6">
             Your Gigs ({gigs.length})
@@ -248,8 +277,8 @@ export default function PosterPanel() {
                           </span>
                         </div>
                         <div className="flex items-center gap-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-3 py-2 rounded-xl border border-purple-400/30">
-                          <div className={`w-2 h-2 rounded-full ${gig.status === "available" ? "bg-green-400 animate-pulse" : gig.status === "claimed" ? "bg-yellow-400" : gig.status === "submitted" ? "bg-orange-400" : "bg-blue-400"}`}></div>
-                          <span className={`font-medium ${gig.status === "available" ? "text-green-300" : gig.status === "claimed" ? "text-yellow-300" : gig.status === "submitted" ? "text-orange-300" : "text-blue-300"}`}>
+                          <div className={`w-2 h-2 rounded-full ${gig.status === "available" ? "bg-green-400 animate-pulse" : gig.status === "claimed" ? "bg-yellow-400" : gig.status === "submitted" ? "bg-orange-400" : gig.status === "approved" ? "bg-emerald-400" : "bg-blue-400"}`}></div>
+                          <span className={`font-medium ${gig.status === "available" ? "text-green-300" : gig.status === "claimed" ? "text-yellow-300" : gig.status === "submitted" ? "text-orange-300" : gig.status === "approved" ? "text-emerald-300" : "text-blue-300"}`}>
                             {gig.status}
                           </span>
                         </div>
@@ -262,6 +291,32 @@ export default function PosterPanel() {
                           </span>
                         </div>
                       </div>
+                      
+                      {/* Completed Work Section */}
+                      {gig.status === "approved" && gig.completedWork && (
+                        <div className="mt-4 p-4 bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-400/20 rounded-2xl">
+                          <h4 className="font-semibold text-emerald-200 mb-2 flex items-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            ✅ Completed Work Available
+                          </h4>
+                          <p className="text-emerald-100 text-sm mb-3">
+                            Your work has been completed and approved. You can now download the final document.
+                          </p>
+                          <a
+                            href={gig.completedWork}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500/20 to-green-500/20 hover:from-emerald-500/30 hover:to-green-500/30 text-emerald-200 px-4 py-2 rounded-xl font-semibold transition-all duration-300 hover:scale-105 border border-emerald-400/30"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download Completed Work
+                          </a>
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col gap-3 lg:min-w-[200px] mt-4 lg:mt-0">
                       <div className="flex gap-2">
