@@ -12,6 +12,7 @@ function Admin() {
   const [editingGigId, setEditingGigId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [claimedEmails, setClaimedEmails] = useState({});
+  const [posterEmails, setPosterEmails] = useState({});
   const [posterApplicants, setPosterApplicants] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserRole, setCurrentUserRole] = useState("");
@@ -33,15 +34,29 @@ function Admin() {
     const claimedByUids = gigsList
       .filter(gig => gig.claimedBy)
       .map(gig => gig.claimedBy);
-    const uniqueUids = [...new Set(claimedByUids)];
-    const emails = {};
-    await Promise.all(uniqueUids.map(async (uid) => {
+    const uniqueClaimedUids = [...new Set(claimedByUids)];
+    const claimedEmailsData = {};
+    await Promise.all(uniqueClaimedUids.map(async (uid) => {
       const userDoc = await getDoc(doc(db, "users", uid));
       if (userDoc.exists()) {
-        emails[uid] = userDoc.data().email;
+        claimedEmailsData[uid] = userDoc.data().email;
       }
     }));
-    setClaimedEmails(emails);
+    setClaimedEmails(claimedEmailsData);
+
+    // Fetch poster emails
+    const postedByUids = gigsList
+      .filter(gig => gig.postedBy)
+      .map(gig => gig.postedBy);
+    const uniquePostedUids = [...new Set(postedByUids)];
+    const posterEmailsData = {};
+    await Promise.all(uniquePostedUids.map(async (uid) => {
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        posterEmailsData[uid] = userDoc.data().email;
+      }
+    }));
+    setPosterEmails(posterEmailsData);
   };
 
   const fetchPosterApplicants = async () => {
@@ -471,6 +486,16 @@ function Admin() {
                           <div className="rounded-xl bg-cyan-900/20 px-4 py-2 flex flex-col sm:flex-row sm:items-center gap-2">
                             <span className="font-semibold text-cyan-300">Claimed by:</span>
                             <span className="text-cyan-100 break-all">{claimedEmails[gig.claimedBy]}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Poster Information Section */}
+                      {(gig.postedBy && posterEmails[gig.postedBy]) && (
+                        <div className="w-full mt-3 mb-4">
+                          <div className="rounded-xl bg-indigo-900/20 px-4 py-2 flex flex-col sm:flex-row sm:items-center gap-2">
+                            <span className="font-semibold text-indigo-300">Posted by:</span>
+                            <span className="text-indigo-100 break-all">{posterEmails[gig.postedBy]}</span>
                           </div>
                         </div>
                       )}
